@@ -1,14 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D5942DDB-FF85-4E1A-BC29-EF39EDE80FF0}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3ECE88A6-FE62-481C-BB12-BF2A9244017F}"
-	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
-	EndProjectSection
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Disclose.DataStores.DocumentDB", "src\Disclose.DataStores.DocumentDB\Disclose.DataStores.DocumentDB.xproj", "{603B5CD2-D9F9-4023-94A0-82BF1B25B3A6}"
 EndProject
