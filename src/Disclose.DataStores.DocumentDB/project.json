@@ -1,5 +1,16 @@
 ﻿{
+  "title": "Disclose.DataStores.DocumentDB",
   "version": "0.1.0-alpha1",
+  "description": "A DocumentDB implementation of a DataStore for Disclose",
+  "authors": [ "Seaal" ],
+  "packOptions": {
+    "licenseUrl": "https://opensource.org/licenses/MIT",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/Seaal/disclose-datastores-documentdb"
+    }
+  },
+  
 
   "dependencies": {
     "Disclose": "0.1.0-alpha4",
