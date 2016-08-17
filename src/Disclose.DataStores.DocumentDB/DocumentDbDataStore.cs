@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using Disclose.DiscordClient;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
-using Microsoft.CSharp.RuntimeBinder;
 
 namespace Disclose.DataStores.DocumentDB
 {
@@ -26,11 +24,9 @@ namespace Disclose.DataStores.DocumentDB
             _helper = new DocumentDbHelper(_client, settings);
         }
 
-        public async Task<TData> GetServerData<TData>(IServer server, string key)
+        public async Task<TData> GetServerDataAsync<TData>(IServer server, string key)
         {
-            DocumentCollection collection = await _helper.GetOrCreateCollection();
-
-            ServerDocument serverDocument = _client.CreateDocumentQuery<ServerDocument>(collection.SelfLink).Where(doc => doc.Id == server.Id.ToString() && doc.Type == DocumentType.Server).ToList().FirstOrDefault();
+            ServerDocument serverDocument = await _helper.GetServerDocument(server);
 
             if (serverDocument == null)
             {
@@ -40,22 +36,26 @@ namespace Disclose.DataStores.DocumentDB
             return serverDocument.GetPropertyValue<TData>(key);
         }
 
-        public async Task SetServerData<TData>(IServer server, string key, TData data)
+        public async Task SetServerDataAsync<TData>(IServer server, string key, TData data)
         {
+            //Users property is already taken to store user data for a server, so this can't be the key
+            if (key == "User")
+            {
+                throw new ArgumentException("key cannot be Users");
+            }
+
             DocumentCollection collection = await _helper.GetOrCreateCollection();
 
-            ServerDocument serverDocument = await _helper.GetOrCreateServerDocument(server);
+            ServerDocument serverDocument = await _helper.GetOrInitServerDocument(server);
 
             serverDocument.SetPropertyValue(key, data);
 
             await _client.UpsertDocumentAsync(collection.SelfLink, serverDocument);
         }
 
-        public async Task<TData> GetUserData<TData>(IUser user, string key)
+        public async Task<TData> GetUserDataAsync<TData>(IUser user, string key)
         {
-            DocumentCollection collection = await _helper.GetOrCreateCollection();
-
-            DiscloseDocument userDocument = _client.CreateDocumentQuery<DiscloseDocument>(collection.SelfLink).Where(doc => doc.Id == user.Id.ToString() && doc.Type == DocumentType.User).ToList().FirstOrDefault();
+            Document userDocument = await _helper.GetUserDocument(user);
 
             if (userDocument == null)
             {
@@ -65,30 +65,20 @@ namespace Disclose.DataStores.DocumentDB
             return userDocument.GetPropertyValue<TData>(key);
         }
 
-        public async Task SetUserData<TData>(IUser user, string key, TData data)
+        public async Task SetUserDataAsync<TData>(IUser user, string key, TData data)
         {
             DocumentCollection collection = await _helper.GetOrCreateCollection();
 
-            DiscloseDocument userDocument = _client.CreateDocumentQuery<DiscloseDocument>(collection.SelfLink).Where(doc => doc.Id == user.Id.ToString() && doc.Type == DocumentType.Server).ToList().FirstOrDefault();
-
-            if (userDocument == null)
-            {
-                userDocument = new DiscloseDocument()
-                {
-                    Id = user.Id.ToString(), Type = DocumentType.Server
-                };
-            }
+            Document userDocument = await _helper.GetOrInitUserDocument(user);
 
             userDocument.SetPropertyValue(key, data);
 
             await _client.UpsertDocumentAsync(collection.SelfLink, userDocument);
         }
 
-        public async Task<TData> GetUserDataForServer<TData>(IServer server, IUser user, string key, TData data)
+        public async Task<TData> GetUserDataForServerAsync<TData>(IServer server, IUser user, string key)
         {
-            DocumentCollection collection = await _helper.GetOrCreateCollection();
-
-            ServerDocument serverDocument = _client.CreateDocumentQuery<ServerDocument>(collection.SelfLink).Where(doc => doc.Id == server.Id.ToString() && doc.Type == DocumentType.Server).ToList().FirstOrDefault();
+            ServerDocument serverDocument = await _helper.GetServerDocument(server);
 
             if (serverDocument == null)
             {
@@ -100,22 +90,26 @@ namespace Disclose.DataStores.DocumentDB
                 return default(TData);
             }
 
-            try
-            {
-                return serverDocument.Users[user.Id][key];
-            }
-            catch (RuntimeBinderException)
+            if (!serverDocument.Users[user.Id].ContainsKey(key))
             {
                 return default(TData);
             }
-            
+
+            Object value = serverDocument.Users[user.Id][key];
+
+            if (value is TData)
+            {
+                return (TData) value;
+            }
+
+            throw new InvalidCastException("Data Exists for this key, but is not of the type you expect");          
         }
 
-        public async Task SetUserData<TData>(IServer server, IUser user, string key, TData data)
+        public async Task SetUserDataForServerAsync<TData>(IServer server, IUser user, string key, TData data)
         {
             DocumentCollection collection = await _helper.GetOrCreateCollection();
 
-            ServerDocument serverDocument = await _helper.GetOrCreateServerDocument(server);
+            ServerDocument serverDocument = await _helper.GetOrInitServerDocument(server);
 
             if (!serverDocument.Users.ContainsKey(user.Id))
             {
@@ -123,6 +117,9 @@ namespace Disclose.DataStores.DocumentDB
             }
 
             serverDocument.Users[user.Id][key] = data;
+
+            //The DocumentDB Wrapper does not like our Users property for some reason, so call SetPropertyValue explicitly here so it is saved
+            serverDocument.SetPropertyValue("Users", serverDocument.Users);
 
             await _client.UpsertDocumentAsync(collection.SelfLink, serverDocument);
         }

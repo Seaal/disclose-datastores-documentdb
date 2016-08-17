@@ -2,8 +2,8 @@
   "version": "0.1.0-alpha1",
 
   "dependencies": {
-    "Microsoft.Azure.DocumentDB": "1.9.3",
-    "Disclose": "0.1.0-alpha3"
+    "Disclose": "0.1.0-alpha4",
+    "Microsoft.Azure.DocumentDB": "1.9.3"
   },
 
   "frameworks": {
