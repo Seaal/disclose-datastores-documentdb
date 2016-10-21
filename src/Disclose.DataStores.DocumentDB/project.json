@@ -1,6 +1,6 @@
 ﻿{
   "title": "Disclose.DataStores.DocumentDB",
-  "version": "0.1.0-alpha1",
+  "version": "0.1.0-alpha2",
   "description": "A DocumentDB implementation of a DataStore for Disclose",
   "authors": [ "Seaal" ],
   "packOptions": {
@@ -13,8 +13,8 @@
   
 
   "dependencies": {
-    "Disclose": "0.1.0-alpha4",
-    "Microsoft.Azure.DocumentDB": "1.9.3"
+    "Disclose": "0.1.0-alpha5",
+    "Microsoft.Azure.DocumentDB": "1.9.5"
   },
 
   "frameworks": {
