@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Dynamic;
-using System.Linq;
 using System.Threading.Tasks;
-using Disclose.DiscordClient;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 
@@ -24,7 +22,7 @@ namespace Disclose.DataStores.DocumentDB
             _helper = new DocumentDbHelper(_client, settings);
         }
 
-        public async Task<TData> GetServerDataAsync<TData>(IServer server, string key)
+        public async Task<TData> GetServerDataAsync<TData>(DiscloseServer server, string key)
         {
             ServerDocument serverDocument = await _helper.GetServerDocument(server);
 
@@ -36,10 +34,10 @@ namespace Disclose.DataStores.DocumentDB
             return serverDocument.GetPropertyValue<TData>(key);
         }
 
-        public async Task SetServerDataAsync<TData>(IServer server, string key, TData data)
+        public async Task SetServerDataAsync<TData>(DiscloseServer server, string key, TData data)
         {
             //Users property is already taken to store user data for a server, so this can't be the key
-            if (key == "User")
+            if (key == "Users")
             {
                 throw new ArgumentException("key cannot be Users");
             }
@@ -53,7 +51,7 @@ namespace Disclose.DataStores.DocumentDB
             await _client.UpsertDocumentAsync(collection.SelfLink, serverDocument);
         }
 
-        public async Task<TData> GetUserDataAsync<TData>(IUser user, string key)
+        public async Task<TData> GetUserDataAsync<TData>(DiscloseUser user, string key)
         {
             Document userDocument = await _helper.GetUserDocument(user);
 
@@ -65,7 +63,7 @@ namespace Disclose.DataStores.DocumentDB
             return userDocument.GetPropertyValue<TData>(key);
         }
 
-        public async Task SetUserDataAsync<TData>(IUser user, string key, TData data)
+        public async Task SetUserDataAsync<TData>(DiscloseUser user, string key, TData data)
         {
             DocumentCollection collection = await _helper.GetOrCreateCollection();
 
@@ -76,7 +74,7 @@ namespace Disclose.DataStores.DocumentDB
             await _client.UpsertDocumentAsync(collection.SelfLink, userDocument);
         }
 
-        public async Task<TData> GetUserDataForServerAsync<TData>(IServer server, IUser user, string key)
+        public async Task<TData> GetUserDataForServerAsync<TData>(DiscloseServer server, DiscloseUser user, string key)
         {
             ServerDocument serverDocument = await _helper.GetServerDocument(server);
 
@@ -95,7 +93,7 @@ namespace Disclose.DataStores.DocumentDB
                 return default(TData);
             }
 
-            Object value = serverDocument.Users[user.Id][key];
+            var value = serverDocument.Users[user.Id][key];
 
             if (value is TData)
             {
@@ -105,7 +103,7 @@ namespace Disclose.DataStores.DocumentDB
             throw new InvalidCastException("Data Exists for this key, but is not of the type you expect");          
         }
 
-        public async Task SetUserDataForServerAsync<TData>(IServer server, IUser user, string key, TData data)
+        public async Task SetUserDataForServerAsync<TData>(DiscloseServer server, DiscloseUser user, string key, TData data)
         {
             DocumentCollection collection = await _helper.GetOrCreateCollection();
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Disclose.DiscordClient;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 
@@ -54,14 +53,14 @@ namespace Disclose.DataStores.DocumentDB
             return _collection;
         }
 
-        public async Task<ServerDocument> GetServerDocument(IServer server)
+        public async Task<ServerDocument> GetServerDocument(DiscloseServer server)
         {
             DocumentCollection collection = await GetOrCreateCollection();
 
             return _client.CreateDocumentQuery<ServerDocument>(collection.SelfLink).Where(doc => doc.Id == GetServerId(server)).ToList().FirstOrDefault();
         }
 
-        public async Task<ServerDocument> GetOrInitServerDocument(IServer server)
+        public async Task<ServerDocument> GetOrInitServerDocument(DiscloseServer server)
         {
             ServerDocument serverDocument = await GetServerDocument(server);
 
@@ -76,14 +75,14 @@ namespace Disclose.DataStores.DocumentDB
             return serverDocument;
         }
 
-        public async Task<Document> GetUserDocument(IUser user)
+        public async Task<Document> GetUserDocument(DiscloseUser user)
         {
             DocumentCollection collection = await GetOrCreateCollection();
 
             return _client.CreateDocumentQuery(collection.SelfLink).Where(doc => doc.Id == GetUserId(user)).ToList().FirstOrDefault();
         }
 
-        public async Task<Document> GetOrInitUserDocument(IUser user)
+        public async Task<Document> GetOrInitUserDocument(DiscloseUser user)
         {
             Document userDocument = await GetUserDocument(user);
 
@@ -98,12 +97,12 @@ namespace Disclose.DataStores.DocumentDB
             return userDocument;
         }
 
-        private string GetServerId(IServer server)
+        private string GetServerId(DiscloseServer server)
         {
             return "server-" + server.Id;
         }
 
-        private string GetUserId(IUser user)
+        private string GetUserId(DiscloseUser user)
         {
             return "user-" + user.Id;
         }
