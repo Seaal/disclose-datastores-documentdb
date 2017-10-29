@@ -53,20 +53,20 @@ namespace Disclose.DataStores.DocumentDB
             return _collection;
         }
 
-        public async Task<ServerDocument> GetServerDocument(DiscloseServer server)
+        public async Task<Document> GetServerDocument(DiscloseServer server)
         {
             DocumentCollection collection = await GetOrCreateCollection();
 
-            return _client.CreateDocumentQuery<ServerDocument>(collection.SelfLink).Where(doc => doc.Id == GetServerId(server)).ToList().FirstOrDefault();
+            return _client.CreateDocumentQuery<Document>(collection.SelfLink).Where(doc => doc.Id == GetServerId(server)).ToList().FirstOrDefault();
         }
 
-        public async Task<ServerDocument> GetOrInitServerDocument(DiscloseServer server)
+        public async Task<Document> GetOrInitServerDocument(DiscloseServer server)
         {
-            ServerDocument serverDocument = await GetServerDocument(server);
+            Document serverDocument = await GetServerDocument(server);
 
             if (serverDocument == null)
             {
-                serverDocument = new ServerDocument()
+                serverDocument = new Document()
                 {
                     Id = GetServerId(server)
                 };
