@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>A DocumentDB implementation of a DataStore for Disclose.</Description>
     <AssemblyTitle>Disclose.DataStores.DocumentDB</AssemblyTitle>
-    <VersionPrefix>0.1.0-alpha2</VersionPrefix>
+    <VersionPrefix>0.2.0</VersionPrefix>
     <Authors>Seaal</Authors>
     <TargetFramework>netstandard1.5</TargetFramework>
     <AssemblyName>Disclose.DataStores.DocumentDB</AssemblyName>
